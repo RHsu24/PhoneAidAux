@@ -6,14 +6,18 @@ import xlsxwriter
 import pandas as pd
 import os
 import glob
+import time
 from openpyxl import load_workbook, Workbook
 
-def simple_split(namelist):
-    #cuts out the number at the end
+def simple_split(namelist, slice):
+    
     word_extr = []
     rubbish = namelist.rpartition("_")
-    word_extr = rubbish[0]
-
+    if slice == 0: #cuts out the number at the end
+        word_extr = rubbish[0]
+    if slice == 1: #keeps word_id as of files
+        word_id = rubbish[2].split(".")
+        word_extr = word_id[0]
     return word_extr
 
 def simple_truncate(namelist):
@@ -44,50 +48,41 @@ def send_speech_analysis_request(
     raise Exception(f"Error: {response.status_code}, {response.text}")
 
 
-def main():
+def request_write(child_id):
+    # time_start = time.time()
     #change rw_folder to path with segmented .wav files you want to analyse
-    rw_folder = r'C:\Users\ricky\Desktop\Jobs\UCanSay66\First Week\Task1\Task1\PhonAid_to_be_scored\PhonAid_to_be_scored\663'
-    os.chdir(rw_folder)
+    rw_folder = Path("C:/Users/ricky/Desktop/Jobs/UCanSay66/First Week/Task1/Task1/PhonAid_to_be_scored/task1")
+    child_files = rw_folder / str(child_id)
 
+    os.chdir(child_files)
+    wb_name = str(child_id) +'_results.xlsx'
     #Excel spreadsheet initialisation, do only once
-    workbook = xlsxwriter.Workbook('results.xlsx')
+    workbook = xlsxwriter.Workbook(wb_name)
     worksheet = workbook.add_worksheet()
     # Add a bold format to use to highlight cells.
     bold = workbook.add_format({'bold': True})
-    worksheet.write('A1', 'Word', bold)
+    worksheet.write('A1', 'Child_ID', bold)
     worksheet.write('B1', 'word_id', bold)
-    worksheet.write('C1', 'annotation', bold)
-    worksheet.write('D1','0', bold)
-    worksheet.write('E1','1', bold)
-    worksheet.write('F1','2', bold)
-    worksheet.write('G1','3', bold)
-    worksheet.write('H1','4', bold)
-    worksheet.write('I1','5', bold)
-    worksheet.write('J1','6', bold)
-    worksheet.write('K1','7', bold)
-    worksheet.write('L1','8', bold)
-    worksheet.write('M1','9', bold)
-    worksheet.write('N1','10', bold)
-    worksheet.write('O1','11', bold)
-    worksheet.write('P1','12', bold)
-    worksheet.write('Q1','13', bold)
-    worksheet.write('R1','14', bold)
-    worksheet.write('S1','15', bold)
-    worksheet.write('T1','16', bold)
-    worksheet.write('U1','17', bold)
-    worksheet.write('V1','18', bold)
-    worksheet.write('W1','19', bold)
+    worksheet.write('C1', 'word', bold)
+    worksheet.write('D1','Sound_ID', bold)
+    worksheet.write('E1','Phoneme_expected', bold)
+    worksheet.write('F1','Phoneme_recognised', bold)
+    worksheet.write('G1','PhoneAid_Evaluation', bold)
+    worksheet.write('H1','PhoneAid_binary', bold)
 
+    # time_wsinit = time.time()
+    # print(f'Wksht Init took {time_wsinit-time_start:.3f} seconds')
     # Start from the first cell below the headers.
     row = 1
     col = 0
     word_count = 0
+    print("Outputting Request Arguments...")
     for files in glob.glob("*.wav"):
 
         speech_file_path = files
         result = send_speech_analysis_request(
         speech_file_path=speech_file_path,
-        target_word=simple_split(speech_file_path),
+        target_word=simple_split(speech_file_path,0),
         lang="en_aus",
         age_cat="c",
         server_url="https://phoneaid-service-948892252068.australia-southeast1.run.app/analyze/",
@@ -100,44 +95,52 @@ def main():
         rec = phoneme["Assess"]["Recognized_aligned"]
         err = phoneme["Assess"]["Errors"]
 
-
-        target_word = simple_split(speech_file_path)
-        worksheet.write(row,col, target_word, bold)
-        worksheet.write(row,col+1, speech_file_path, bold)
-        worksheet.write(row,col+2, 'Expected', bold)
-        worksheet.write(row+1,col+2, 'Recognised', bold)
-        worksheet.write(row+2,col+2, 'Type', bold)
-        for i, (e, r, tag) in enumerate(zip(exp, rec, err), start=1):
+        target_word = simple_split(speech_file_path,0)
+        word_id = simple_split(speech_file_path,1)
+        # time_reqp = time.time()
+        # print(f'Req proc took {time_reqp-time_wsinit:.3f} seconds')
+        
+        for ph_count, (e, r, tag) in enumerate(zip(exp, rec, err), start=1):
             #print(f"{i:02d}. {e} -> {r} [{tag}]")
-            worksheet.write(row,col+3, e)
-            worksheet.write(row+1,col+3, r)
-            worksheet.write(row+2,col+3,tag)  
-            col+=1
-        col=0
-        row+=3
+            phn_list = 'Ph' + str(ph_count)
+            worksheet.write(row,col,child_id)
+            worksheet.write(row,col+1, word_id) # check if this needs to be included
+            worksheet.write(row,col+2, target_word)
+            worksheet.write(row,col+3,phn_list)
+            worksheet.write(row,col+4, e) #expected
+            worksheet.write(row,col+5, r) #recognised
+            worksheet.write(row,col+6,tag)  # H/S/I/D
+            if tag == 'H':
+                worksheet.write(row,col+7,'1')
+            else:
+                worksheet.write(row,col+7,'0')
+            row+=1
         word_count += 1
 
     workbook.close()
     print(f"Speech Analysis Done! There were {word_count} words analysed")
+    # time_end = time.time()
+    # print(f'WS entry took {time_end-time_reqp:.3f} seconds')
+    # print(f'Request took {time_end-time_start:.3f} seconds')
 
-    # Format XLSX sheet to look nicer
+def main():
 
-    print("Beginning Excel Sheet Cleanup")
-    # Merge cells to make output file look nicer
-    row = 2
-    col = 1
-    
-    wb = load_workbook(filename = 'results.xlsx')
-    ws = wb.active
-    for row in range(2, 3*word_count+1,3):
-        ws.merge_cells(start_row=row,end_row=row+2,start_column=col,end_column=col)
-        ws.merge_cells(start_row=row,end_row=row+2,start_column=col+1,end_column=col+1)  
+    for i in range(b):
+        print(f'Evaluating files for Patient {a[i]}')
+        request_write(a[i])
 
-    wb.save('results.xlsx')
-    print("Excel Sheet Prettified!")
 if __name__ == '__main__':
 
     welcome_msg = "This is here to show it is running\n"
     print(welcome_msg)
-    
+    # Create an empty list to store the inputs
+    a = []
+
+    # Ask the user for how many items they want to input
+    b = int(input("How many IDs do you want to enter? "))
+
+    # Loop to collect multiple inputs
+    for i in range(b):
+        val = input(f"Enter Child ID #{i + 1}: ")
+        a.append(val)
     main()
