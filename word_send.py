@@ -1,13 +1,10 @@
-
 import requests
 from pathlib import Path
 import json
 import xlsxwriter
-import pandas as pd
 import os
 import glob
-import time
-from openpyxl import load_workbook, Workbook
+import argparse
 
 def simple_split(namelist, slice):
     
@@ -49,9 +46,8 @@ def send_speech_analysis_request(
 
 
 def request_write(child_id):
-    # time_start = time.time()
     #change rw_folder to path with segmented .wav files you want to analyse
-    rw_folder = Path("C:/Users/ricky/Desktop/Jobs/UCanSay66/First Week/Task1/Task1/PhonAid_to_be_scored/task1")
+    rw_folder = Path.cwd()
     child_files = rw_folder / str(child_id)
 
     os.chdir(child_files)
@@ -70,8 +66,6 @@ def request_write(child_id):
     worksheet.write('G1','PhoneAid_Evaluation', bold)
     worksheet.write('H1','PhoneAid_binary', bold)
 
-    # time_wsinit = time.time()
-    # print(f'Wksht Init took {time_wsinit-time_start:.3f} seconds')
     # Start from the first cell below the headers.
     row = 1
     col = 0
@@ -97,8 +91,6 @@ def request_write(child_id):
 
         target_word = simple_split(speech_file_path,0)
         word_id = simple_split(speech_file_path,1)
-        # time_reqp = time.time()
-        # print(f'Req proc took {time_reqp-time_wsinit:.3f} seconds')
         
         for ph_count, (e, r, tag) in enumerate(zip(exp, rec, err), start=1):
             #print(f"{i:02d}. {e} -> {r} [{tag}]")
@@ -119,17 +111,29 @@ def request_write(child_id):
 
     workbook.close()
     print(f"Speech Analysis Done! There were {word_count} words analysed")
-    # time_end = time.time()
-    # print(f'WS entry took {time_end-time_reqp:.3f} seconds')
-    # print(f'Request took {time_end-time_start:.3f} seconds')
 
 def main():
+    cwd = Path.cwd()
+    rw_folder = cwd / 'task1'
+    parser = argparse.ArgumentParser()
+    parser.add_argument("data_dir", type=str, default=rw_folder,
+                        help="Relative file path to the .wav and annotation files.")
+    args = parser.parse_args()
+
+    rd_folder = cwd / args.data_dir
+    # Output dir
+    if not os.path.exists(rd_folder):
+        os.chdir(rw_folder)
+        print(rw_folder)
+    else:
+        os.chdir(rd_folder)
 
     for i in range(b):
         print(f'Evaluating files for Patient {a[i]}')
         request_write(a[i])
 
 if __name__ == '__main__':
+
 
     welcome_msg = "This is here to show it is running\n"
     print(welcome_msg)
