@@ -13,18 +13,24 @@ and output .xlsx files.
 
 Example:
 
-py speech_segment.py [folder]
+> py speech_segment.py [folder]
+
 where [folder] is the directory holding the unsegmented audio file and corresponding .csv file
 
-py word_send.py [folder]
+> py word_send.py [folder]
+
 where [folder] is the directory holding the unsegmented audio file and corresponding .csv file
 
-Both are not intended to be run on a server, and rather on a local directory. It is possible it may work on 
+Both are <strong>not<strong> intended to be run on a server, and rather on a local directory. It is possible it may work on 
 server files, but I have not tested it and is up to user to modify code to fit the use, notably in:
-speech_segment.py:
-- modifying [cwd] and [rw_folder] on Line 90 & 91 to match filepath [cwd/rw_folder]
-- modifying Line 13 "_corrected" to match end part of annotated .csv file name (e.g. annotated file name has
-000_task1_kaldi.csv, adjust it to "_kaldi"). If no end part, then adjust it to "."
+<strong>speech_segment.py:<strong>
+<ul>
+  <li>modifying [cwd] and [rw_folder] on Line 90 & 91 to match filepath [cwd/rw_folder]</li>
+  <li>modifying Line 13 "_corrected" to match end part of annotated .csv file name (e.g. annotated file name has
+      000_task1_kaldi.csv, adjust it to "_kaldi"). If no end part, then adjust it to "."</li>
+</ul>
 
-word_send.py:
-- modifying [cwd] and [rw_folder] on Line 116 & 117 to match filepath [cwd/rw_folder]
+<strong>word_send.py:<strong>
+<ul>
+  <li>modifying [cwd] and [rw_folder] on Line 116 & 117 to match filepath [cwd/rw_folder]</li>
+</ul>
