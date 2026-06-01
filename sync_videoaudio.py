@@ -172,8 +172,10 @@ def apply_offset(match_t, csv_file):
     df_new["video_max"] = mp4_tmax
 
     # Save to csv
+    get_id = csv_file.split("_")
+    new_name = get_id[0] + '.csv'
     print(f'Saved to .csv in current directory')
-    df_new.to_csv("750.csv", index=False)
+    df_new.to_csv(new_name, index=False)
 
 def process_input(transcript_dir, data_dir, mp4_dir):
         # Transcript PATH is not optional
@@ -206,7 +208,7 @@ def main():
     parser.add_argument('wav_dir', type=str, default = None,
                         help="Absolute or Relative file PATH to the .wav file.")
     parser.add_argument('mp4_dir', type=str, default = None,
-                        help="Absolute or Relative file PATH to the .wav file.")
+                        help="Absolute or Relative file PATH to the .mp4 file.")
     args = parser.parse_args()
     slice_data = process_input(args.transcript_dir, args.wav_dir, args.mp4_dir)
 
