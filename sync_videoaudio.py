@@ -161,8 +161,6 @@ def apply_offset(match_t, csv_file):
 
     mp4_tmin = np.empty(len(df_tmin))
     mp4_tmax = np.empty(len(df_tmax))
-    first_min = df_tmin[0]
-    print(f'First evaluated speech at {first_min}s')
 
     for i, (min, max) in enumerate(zip(df_tmin, df_tmax)):
         mp4_tmin[i] = min + match_t 
