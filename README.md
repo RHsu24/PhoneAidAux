@@ -1,3 +1,5 @@
+### README for speech_segment.py and word_send.py
+
 ```speech_segment.py``` is designed to segment complete audio (.wav) files into single words as listed in a 
 corresponding .csv file. It will also create a corresponding directory if it does not already exist.
 
@@ -34,6 +36,8 @@ server files, but I have not tested it and is up to user to modify code to fit t
 <ul>
   <li>modifying [cwd] and [rw_folder] on Line 116 & 117 to match filepath [cwd/rw_folder]</li>
 </ul>
+
+### README for sync_videoaudio.py
 
 ```sync_videoaudio.py``` is designed to align .mp4 audio and .wav file audio for the same patient test. It will find the offset
 between the start of each file, then read the transcription files of the .wav audio to adjust timings based on the offset 
