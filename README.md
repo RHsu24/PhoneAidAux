@@ -1,7 +1,7 @@
-speech_segment.py is designed to segment complete audio (.wav) files into single words as listed in a 
+```speech_segment.py``` is designed to segment complete audio (.wav) files into single words as listed in a 
 corresponding .csv file. It will also create a corresponding directory if it does not already exist.
 
-word_send.py is designed to run requests to the PhoneAid server by evaluating single words
+```word_send.py``` is designed to run requests to the PhoneAid server by evaluating single words
 at a time and writing the output returned directly to an .xlsx file. The script can take multiple IDs
 to evaluate at a time, by specifying the # of IDs to evaluate, and the ID### itself.
 
@@ -34,3 +34,15 @@ server files, but I have not tested it and is up to user to modify code to fit t
 <ul>
   <li>modifying [cwd] and [rw_folder] on Line 116 & 117 to match filepath [cwd/rw_folder]</li>
 </ul>
+
+```sync_videoaudio.py``` is designed to align .mp4 audio and .wav file audio for the same patient test. It will find the offset
+between the start of each file, then read the transcription files of the .wav audio to adjust timings based on the offset 
+found.
+
+How to run:
+
+For simplicity, it should be placed in the same directory as both .mp4 and .wav files and associated transcription (.csv) file.
+
+> py sync_videoaudio.py [transcript_file] [wav_file] [mp4_file]
+
+where [transcript_file] is the .csv trancscription file associated with the [wav_file] .wav audio file, and [mp4_file] is the mp4 file with the same source as the .wav file.
